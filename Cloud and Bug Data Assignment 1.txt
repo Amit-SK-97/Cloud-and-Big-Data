@@ -1,0 +1,79 @@
+This dataset has two tables.
+Table 1 is named tutorial.crunchbase_companies and has data on the acquired companies
+Table 2 is named tutorial.crunchbase_acquisitions and has data about the aquirer (Primary Key) and its aquisition (Forgien Key)
+The table is One to Many relationship
+i.e An Acquirer would have invested in more than 1 company
+The Data is sourced from mode.com and run on its own hosted SQL editor
+Ref: https://mode.com/
+
+Question 1:
+Count the number of unique companies and unique acquiring companies by state.
+Do not include results for which there is no state data, and order by the number of acquired companies from highest to lowest.
+
+ SELECT funders.state_code,
+ COUNT(DISTINCT funders.permalink) AS uniq_companies,
+ COUNT(DISTINCT startups.company_permalink) AS uniq_startups
+ FROM tutorial.crunchbase_companies funders
+ LEFT JOIN tutorial.crunchbase_acquisitions startups
+ ON funders.permalink = startups.company_permalink
+ WHERE funders.state_code IS NOT NULL
+ GROUP BY 1
+ ORDER BY 3 DESC
+ 
+ Question 2:
+ A query that shows a company's name, "status" (found in the Companies table), and the number of unique investors in that company. 
+ Order by the number of investors from most to fewest. Limit to only companies in the state of New York.
+ 
+ SELECT funders.name AS name_of_the_company,
+ funders.status,
+ COUNT(DISTINCT startups.investor_name) AS uniq_investors
+ FROM tutorial.crunchbase_companies funders
+ LEFT JOIN tutorial.crunchbase_investments startups
+ ON funders.permalink = startups.company_permalink
+ WHERE funders.state_code = 'NY'
+ GROUP BY 1,2
+ ORDER BY 3 DESC
+ 
+ 
+ Question 3:
+ Write a query that lists investors based on the number of companies in which they are invested. 
+ Include a row for companies with no investor, and order from most companies to least.
+ 
+ SELECT CASE WHEN startups.investor_name IS NULL THEN 'No Investors'
+ ELSE startups.investor_name END AS investor,
+ COUNT(DISTINCT funders.permalink) AS invested_companies
+ FROM tutorial.crunchbase_companies funders
+ LEFT JOIN tutorial.crunchbase_investments startups
+ ON funders.permalink = startups.company_permalink
+ GROUP BY 1
+ ORDER BY 2 DESC
+ 
+
+From Question 4 a new dataset is used.
+For the next few lessons, you'll work with data on College Football Players. 
+This data was collected from ESPN on January 15, 2014 from the rosters listed on https://www.espn.com/college-football/teams
+This dataset has two tables
+Table 1: benn.college_football_players contains the records of players from all schools across USA
+Table 2: benn.college_football_teams contains data more about the schools
+
+
+Question 4:
+A query to find the average weight of players from schools who participated in a conference
+
+SELECT teams.conference AS conference,
+AVG(players.weight) AS average_weight
+FROM benn.college_football_players players
+JOIN benn.college_football_teams teams
+ON teams.school_name = players.school_name
+GROUP BY teams.conference
+ORDER BY AVG(players.weight) DESC
+ 
+Question 5:
+
+SELECT
+CASE WHEN state = 'CA' AND year IN ('FR','SO') then 'Underclass'
+WHEN state ='CA' AND year IN ('JR','SR') then 'Upperclass'
+END AS class_of_player,
+SUM (Weight) as weight_sum
+FROM benn.college_football_players
+GROUP BY class_of_player
